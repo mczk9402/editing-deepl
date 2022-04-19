@@ -397,3 +397,9 @@ Ensure the default browser behavior of the `hidden` attribute.
 }
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .area-span-1 {
+    grid-area: 1/2;
+  }
+}
