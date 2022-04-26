@@ -1,25 +1,28 @@
 import type { NextPage } from "next";
+import { Button, Textarea, Text, Loader, Title } from "@mantine/core";
+import { createRef, RefObject, useRef, useState } from "react";
 import {
-  Button,
-  Textarea,
-  Card,
-  Text,
-  useMantineTheme,
-  Loader,
-  Title,
-} from "@mantine/core";
-import { useRef, useState } from "react";
-import { HiClipboardCopy, HiPaperAirplane, HiXCircle } from "react-icons/hi";
+  HiClipboardCopy,
+  HiPaperAirplane,
+  HiXCircle,
+  HiArrowDown,
+} from "react-icons/hi";
 import Head from "next/head";
 
 const Home: NextPage = () => {
   const [text, setText] = useState("");
-  const [editingList, setEditingList] = useState<
-    { input: string; editing: string; time: string }[]
-  >([]);
+  const [editingList, setEditingList] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-
-  const fixList = ["iosでコピペがうまくいかない", "デザイン調整"];
+  const fixList = [
+    "デザイン調整",
+    "追加時に下にスクロールさせたい",
+    "改行を引き継ぐ",
+    "ボタンにツールチップ",
+    "グレー座布団ホバーでボタンを表示したい",
+    "履歴の全削除いるかな？",
+    "コンポーネント化したい",
+    "range.selectNodeContentsの型なんとかしたい",
+  ];
 
   const handleEditing = (sendText: string) => {
     setLoading(true);
@@ -33,32 +36,22 @@ const Home: NextPage = () => {
         )
           .then((res) => res.json())
           .then((res) => {
-            const date = new Date();
-            setEditingList((prev) => {
-              return [
-                ...prev,
-                {
-                  input: sendText,
-                  editing: res.translations[0].text,
-                  time:
-                    date.getHours().toString() +
-                    ":" +
-                    date.getMinutes().toString() +
-                    ":" +
-                    date.getSeconds().toString(),
-                },
-              ];
-            });
+            const array =
+              sendText === editingList.slice(-1)[0]
+                ? [res.translations[0].text]
+                : [sendText, res.translations[0].text];
+
+            setEditingList((prev) => [...prev, ...array]);
             setLoading(false);
           });
       });
   };
 
-  const theme = useMantineTheme();
-  const secondaryColor =
-    theme.colorScheme === "dark" ? theme.colors.dark[1] : theme.colors.gray[7];
-
   const refFooter = useRef<HTMLElement | null>(null);
+  const refs = useRef<RefObject<HTMLDivElement>[]>([]);
+  editingList.forEach((_, i) => {
+    refs.current[i] = createRef();
+  });
 
   return (
     <>
@@ -69,15 +62,18 @@ const Home: NextPage = () => {
           content="width=device-width,initial-scale=1.0,maximum-scale=1.0"
         />
       </Head>
+
       <div
         className="min-h-full p-4"
         style={{ marginBottom: refFooter?.current?.clientHeight + "px" }}
       >
         <div className="grid gap-2">
           {editingList.map((editingItem, i) => (
-            <Card className="grid gap-2" shadow="sm" p="lg" key={i}>
-              <div className="flex items-center justify-between">
-                {editingItem.time}
+            <div className="rounded-md bg-[#f1f3f5] p-2" key={i}>
+              <Text size="xs" weight="700" color="gray" ref={refs.current[i]}>
+                {editingItem}
+              </Text>
+              <div className="grid grid-flow-col items-center justify-end">
                 <Button
                   compact
                   variant="subtle"
@@ -89,119 +85,37 @@ const Home: NextPage = () => {
                 >
                   <HiXCircle />
                 </Button>
+                <Button
+                  compact
+                  variant="subtle"
+                  onClick={() => {
+                    const selected = window.getSelection();
+                    const range = document.createRange();
+                    range.selectNodeContents(refs.current[i].current as Node);
+                    selected?.removeAllRanges();
+                    selected?.addRange(range);
+                    document.execCommand("copy");
+                  }}
+                >
+                  <HiClipboardCopy />
+                </Button>
+                <Button
+                  compact
+                  variant="subtle"
+                  onClick={() => setText(editingItem)}
+                >
+                  <HiArrowDown />
+                </Button>
               </div>
-              <Text size="xs" weight="700" color="gray">
-                before
-              </Text>
-              <div className="rounded-md bg-[#f1f3f5] p-2">
-                <Textarea
-                  autosize
-                  minRows={2}
-                  value={editingItem.input}
-                  variant="unstyled"
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setEditingList((prev) => {
-                      return prev.map((item, index) => {
-                        if (index === i) {
-                          return {
-                            input: e.target.value,
-                            editing: item.editing,
-                            time: item.time,
-                          };
-                        }
-                        return item;
-                      });
-                    })
-                  }
-                />
-                <div className="grid grid-flow-col items-center justify-end">
-                  <Button
-                    compact
-                    variant="subtle"
-                    onClick={() => navigator.clipboard.writeText(text)}
-                  >
-                    <HiClipboardCopy />
-                  </Button>
-                  <Button
-                    onClick={() => handleEditing(editingItem.input)}
-                    disabled={loading}
-                    compact
-                  >
-                    <div className="grid items-center justify-items-center">
-                      <HiPaperAirplane
-                        className={`${
-                          loading ? "opacity-0" : "opacity-100"
-                        } area-span-1 transition-opacity`}
-                      />
-                      <Loader
-                        className={`${
-                          loading ? "opacity-100" : "opacity-0"
-                        } area-span-1 transition-opacity`}
-                        variant="dots"
-                        size="xs"
-                      />
-                    </div>
-                  </Button>
-                </div>
-              </div>
-              <Text size="xs" weight="700" color="gray">
-                after
-              </Text>
-              <div className="rounded-md bg-[#f1f3f5] p-2">
-                <Textarea
-                  autosize
-                  minRows={2}
-                  value={editingItem.editing}
-                  variant="unstyled"
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                    setEditingList((prev) => {
-                      return prev.map((item, index) => {
-                        if (index === i) {
-                          return {
-                            input: item.input,
-                            editing: e.target.value,
-                            time: item.time,
-                          };
-                        }
-                        return item;
-                      });
-                    })
-                  }
-                />
-                <div className="grid grid-flow-col items-center justify-end">
-                  <Button
-                    compact
-                    variant="subtle"
-                    onClick={() => navigator.clipboard.writeText(text)}
-                  >
-                    <HiClipboardCopy />
-                  </Button>
-                  <Button
-                    onClick={() => handleEditing(editingItem.editing)}
-                    disabled={loading}
-                    compact
-                  >
-                    <div className="grid items-center justify-items-center">
-                      <HiPaperAirplane
-                        className={`${
-                          loading ? "opacity-0" : "opacity-100"
-                        } area-span-1 transition-opacity`}
-                      />
-                      <Loader
-                        className={`${
-                          loading ? "opacity-100" : "opacity-0"
-                        } area-span-1 transition-opacity`}
-                        variant="dots"
-                        size="xs"
-                      />
-                    </div>
-                  </Button>
-                </div>
-              </div>
-            </Card>
+            </div>
           ))}
 
-          <Title order={5}>修正したいリスト</Title>
+          <Text size="xs" weight="700" color="gray">
+            DeepLAPIを使って日本語を英語に翻訳し、それを日本語に再翻訳することで、日本語の表現をよりきれいにすることができるかもしれないアプリ
+          </Text>
+
+          <Title order={6}>修正したいリスト</Title>
+
           <ul>
             {fixList.map((fixItem, i) => (
               <li key={i}>
@@ -226,14 +140,27 @@ const Home: NextPage = () => {
             onChange={(e) => setText(e.target.value)}
           />
           <div className="grid grid-flow-col items-center justify-end">
+            <Button compact variant="subtle" onClick={() => setText("")}>
+              <HiXCircle />
+            </Button>
             <Button
               compact
               variant="subtle"
-              onClick={() => navigator.clipboard.writeText(text)}
+              onClick={() => {
+                const selected = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(
+                  refFooter.current?.children[0].children[0].children[0] as Node
+                );
+                selected?.removeAllRanges();
+                selected?.addRange(range);
+                document.execCommand("copy");
+              }}
             >
               <HiClipboardCopy />
             </Button>
             <Button
+              className="ml-2"
               onClick={() => handleEditing(text)}
               disabled={loading}
               compact
