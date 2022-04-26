@@ -6,7 +6,7 @@ import {
   Text,
   useMantineTheme,
   Loader,
-  Input,
+  Title,
 } from "@mantine/core";
 import { useRef, useState } from "react";
 import { HiClipboardCopy, HiPaperAirplane, HiXCircle } from "react-icons/hi";
@@ -18,6 +18,8 @@ const Home: NextPage = () => {
     { input: string; editing: string; time: string }[]
   >([]);
   const [loading, setLoading] = useState(false);
+
+  const fixList = ["iosでコピペがうまくいかない", "デザイン調整"];
 
   const handleEditing = (sendText: string) => {
     setLoading(true);
@@ -198,6 +200,17 @@ const Home: NextPage = () => {
               </div>
             </Card>
           ))}
+
+          <Title order={5}>修正したいリスト</Title>
+          <ul>
+            {fixList.map((fixItem, i) => (
+              <li key={i}>
+                <Text size="xs" weight="700" color="gray">
+                  ・{fixItem}
+                </Text>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <footer
