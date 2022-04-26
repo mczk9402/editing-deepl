@@ -110,6 +110,12 @@ const Home: NextPage = () => {
             </div>
           ))}
 
+          {loading && (
+            <div className="grid justify-center rounded-md bg-[#f1f3f5] p-2">
+              <Loader size="sm" />
+            </div>
+          )}
+
           <Text size="xs" weight="700" color="gray">
             DeepLAPIを使って日本語を英語に翻訳し、それを日本語に再翻訳することで、日本語の表現をよりきれいにすることができるかもしれないアプリ
           </Text>
@@ -135,7 +141,7 @@ const Home: NextPage = () => {
             autosize
             variant="unstyled"
             minRows={2}
-            placeholder="テキストを書く"
+            placeholder="テキストを入力してください"
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
