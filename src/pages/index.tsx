@@ -81,6 +81,9 @@ const Home: NextPage = () => {
         {/* <meta property="og:image" content="" /> */}
         {/* <meta property="og:image:width" content="" /> */}
         {/* <meta property="og:image:height" content="" /> */}
+
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="mczk9402" />
       </Head>
 
       <div
