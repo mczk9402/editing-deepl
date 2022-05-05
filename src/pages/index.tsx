@@ -15,13 +15,14 @@ const Home: NextPage = () => {
   const [loading, setLoading] = useState(false);
   const fixList = [
     "デザイン調整",
-    "追加時に下にスクロールさせたい",
     "改行を引き継ぐ",
     "ボタンにツールチップ",
     "グレー座布団ホバーでボタンを表示したい",
     "履歴の全削除いるかな？",
     "コンポーネント化したい",
     "range.selectNodeContentsの型なんとかしたい",
+    "OGPイメージいるかな",
+    "ダークモードに切り替えたい",
   ];
 
   const handleEditing = (sendText: string) => {
@@ -43,6 +44,10 @@ const Home: NextPage = () => {
 
             setEditingList((prev) => [...prev, ...array]);
             setLoading(false);
+
+            const element = document.documentElement;
+            const bottom = element.scrollHeight - element.clientHeight;
+            window.scroll(0, bottom);
           });
       });
   };
@@ -61,6 +66,21 @@ const Home: NextPage = () => {
           name="viewport"
           content="width=device-width,initial-scale=1.0,maximum-scale=1.0"
         />
+        <meta
+          name="description"
+          content="DeepLAPIを使って日本語を英語に翻訳し、それを日本語に再翻訳することで、日本語の表現をよりきれいにすることができるかもしれないアプリ"
+        />
+        <meta property="og:url" content="https://editing.mczk9402.com/" />
+        <meta property="og:title" content="deepl校正" />
+        <meta property="og:site_name" content="deepl校正" />
+        <meta
+          property="og:description"
+          content="DeepLAPIを使って日本語を英語に翻訳し、それを日本語に再翻訳することで、日本語の表現をよりきれいにすることができるかもしれないアプリ"
+        />
+        <meta property="og:type" content="website" />
+        {/* <meta property="og:image" content="" /> */}
+        {/* <meta property="og:image:width" content="" /> */}
+        {/* <meta property="og:image:height" content="" /> */}
       </Head>
 
       <div
@@ -110,14 +130,28 @@ const Home: NextPage = () => {
             </div>
           ))}
 
-          {loading && (
-            <div className="grid justify-center rounded-md bg-[#f1f3f5] p-2">
-              <Loader size="sm" />
-            </div>
-          )}
-
           <Text size="xs" weight="700" color="gray">
             DeepLAPIを使って日本語を英語に翻訳し、それを日本語に再翻訳することで、日本語の表現をよりきれいにすることができるかもしれないアプリ
+          </Text>
+
+          <Text
+            className="grid grid-flow-col justify-start gap-2"
+            size="xs"
+            weight="700"
+            color="gray"
+          >
+            <div className="grid grid-flow-col items-center justify-start">
+              <HiXCircle /> : 削除
+            </div>
+            <div className="grid grid-flow-col items-center justify-start">
+              <HiClipboardCopy /> : コピー
+            </div>
+            <div className="grid grid-flow-col items-center justify-start">
+              <HiArrowDown /> : 編集
+            </div>
+            <div className="grid grid-flow-col items-center justify-start">
+              <HiPaperAirplane /> : 送信
+            </div>
           </Text>
 
           <Title order={6}>修正したいリスト</Title>
@@ -137,10 +171,19 @@ const Home: NextPage = () => {
           className="fixed bottom-0 left-0 z-10 grid w-full gap-2 border-t border-gray-200 bg-white p-4"
           ref={refFooter}
         >
+          {loading && (
+            <div className="absolute bottom-full grid w-full grid-flow-col items-center justify-start gap-2 bg-black/70 px-4 py-2">
+              <Loader variant="dots" size="xs" color="white" />
+              <Text size="xs" weight="700" color="white">
+                入力したテキストを校正中...
+              </Text>
+            </div>
+          )}
           <Textarea
             autosize
-            variant="unstyled"
-            minRows={2}
+            variant="filled"
+            radius="xl"
+            minRows={1}
             placeholder="テキストを入力してください"
             value={text}
             onChange={(e) => setText(e.target.value)}
